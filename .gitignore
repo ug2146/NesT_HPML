@@ -9,5 +9,5 @@ datasets/
 # WandB info
 wandb/
 
-# Experiments
-experiments/*
+# Experiments - saved models
+*tar

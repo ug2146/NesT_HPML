@@ -39,12 +39,12 @@ class Trainer():
         self.warmup_epochs = self.config['warmup_epochs']
         self.warmup_lr = self.config['warmup_lr']
         self.lr = self.config['lr']
-        self.lr_restart = self.config['lr_restart']
+        # self.lr_restart = self.config['lr_restart']
         self.lr_min = self.config['lr_min']
         # self.global_train_step = 0
 
         self.save_interval = self.config['save_every']
-        self.prev_save = 0
+        self.prev_save = -1
 
         self.output_dir = output_dir
 
@@ -68,6 +68,8 @@ class Trainer():
         # Initialize
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.dataClass = get_dataclass(config)
+
+        logging.info(f"Model: {self.config['model']}")
         
         self.model = get_model(self.config['model'], pretrained=False)
         self.model.to(self.device)
@@ -115,8 +117,8 @@ class Trainer():
         logging.info(f"Initializing the training learning rate scheduler")
 
         self.train_scheduler = get_scheduler(self.config['train_scheduler'])
-        self.train_scheduler = self.train_scheduler(self.optimizer, T_max=self.lr_restart, eta_min=self.lr_min)
-        
+        self.train_scheduler = self.train_scheduler(self.optimizer, T_max=self.train_epochs, eta_min=self.lr_min)
+
         # Actual training
         for e in range(self.warmup_epochs, self.train_epochs):
             self.e = e
@@ -124,7 +126,7 @@ class Trainer():
             epoch_train_time, epoch_train_dataload_time, epoch_train_deviceload_time, epoch_train_overhead_time = self.per_epoch(key='train')
             epoch_test_time, epoch_test_dataload_time, epoch_test_deviceload_time, epoch_test_overhead_time = self.per_epoch(key='test')
             self.train_scheduler.step()
-            if self.prev_save - e == self.save_interval:
+            if e - self.prev_save == self.save_interval:
                 self.prev_save = e
                 torch.save({
                     'epoch': e,
@@ -167,6 +169,7 @@ class Trainer():
                 tepoch.set_description(f"Epoch {self.e}: {key}")
                 while(current_iteration < total_iterations):
                     current_iteration += 1
+                    
                     if self.device == 'cuda':   torch.cuda.synchronize()
                     dataload_start = time.perf_counter()
                     data, target = next(self.iterator)
@@ -192,8 +195,8 @@ class Trainer():
 
                     minibatch_accuracy = torch.sum(torch.argmax(output, dim=1) == target) / target.shape[0]
                     
-                    epoch_mode_accuracy += minibatch_accuracy * target.shape[0]
-                    epoch_mode_loss += minibatch_loss * target.shape[0]
+                    epoch_mode_accuracy += 100. * minibatch_accuracy.item() * target.shape[0]
+                    epoch_mode_loss += minibatch_loss.item() * target.shape[0]
                     
                     tepoch.update(1)
                     tepoch.set_postfix(mb_loss=minibatch_loss.item(), 
@@ -201,9 +204,6 @@ class Trainer():
                     
                     if self.device == 'cuda':   torch.cuda.synchronize()
                     overhead_end = time.perf_counter()
-
-                    current_iteration += 1
-                    
                     # if key == 'train': self.global_train_step += 1
 
                     epoch_dataload_time += (dataload_end - dataload_start)
@@ -214,7 +214,7 @@ class Trainer():
             epoch_mode_accuracy /= len(dataloader[key].dataset)
             epoch_mode_loss /= len(dataloader[key].dataset)
 
-        wandb.log({f"{key}-epoch-loss": epoch_mode_accuracy}, step=self.e)
-        wandb.log({f"{key}-epoch-accuracy": epoch_mode_loss}, step=self.e)
+        wandb.log({f"{key}-epoch-accuracy": epoch_mode_accuracy}, step=self.e)
+        wandb.log({f"{key}-epoch-loss": epoch_mode_loss}, step=self.e)
 
         return epoch_mode_time, epoch_dataload_time, epoch_deviceload_time, epoch_overhead_time
