@@ -1,2 +1,2 @@
 timm
-pytorch-lightning
+wandb
