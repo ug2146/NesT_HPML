@@ -50,15 +50,16 @@ def load_config(args):
 
 def main(config):
 
+    print("Current configuration: ")
     pprint(config)
 
     # Support for only single-gpu training
-    assert(config['ngpus'] == 1, "Sorry! Only single-gpu training is supported!")
+    assert config['ngpus'] == 1, "Sorry! Only single-gpu training is supported!"
     
     # Create output/experiment folder and save config file
     output_dir = os.path.join("experiments", config['name'])
     os.makedirs(output_dir, exist_ok = True)
-    with open(os.path.join(output_dir, config.yaml), 'w') as outfile:
+    with open(os.path.join(output_dir, "config.yaml"), 'w') as outfile:
         yaml.dump(config, outfile, sort_keys=False, default_flow_style=False)
 
     # Setup logging
@@ -76,11 +77,21 @@ def main(config):
     train_dl = dataClass.make_dataloader(train=True)
     test_dl = dataClass.make_dataloader(train=False)
 
+    logging.info(f"Number of train samples in the {config['dataset']} dataset: {len(train_dl.dataset)}")
+    logging.info(f"Number of test samples in the {config['dataset']} dataset: {len(test_dl.dataset)}")
+
+    return
+
     optimizer = get_optimizer(config['optimizer'])
     optimizer = optimizer(model.parameters(), lr=config['lr'], weight_decay=config['weight_decay'])
 
-    scheduler = get_scheduler(config['scheduler'])
-    scheduler = scheduler(optimizer, warmup_epochs=config['warmup_epochs'], max_epochs=config['nepochs'], warmup_start_lr=config['warmup_start_lr'])
+    train_scheduler = get_scheduler(config['train_scheduler'])
+    train_scheduler = train_scheduler
+
+    train_scheduler = get_scheduler(config['train_scheduler'])
+    train_scheduler = train_scheduler(optimizer, warmup_epochs=config['warmup_epochs'], max_epochs=config['nepochs'], warmup_start_lr=config['warmup_start_lr'])
+
+
 
     # Train loop
 
