@@ -39,8 +39,21 @@ _logger = logging.getLogger(__name__)
 #                             NesT with Lightweight MSA                         #
 #################################################################################
 class ConvLayer(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, use_bias=True, norm=None, act_func=None):
+    def __init__(
+            self, 
+            in_channels, 
+            out_channels, 
+            kernel_size, 
+            stride=1, 
+            padding=0, 
+            use_bias=True, 
+            norm=None, 
+            act_func=None
+    ):
         super(ConvLayer, self).__init__()
+        # print("Conv Layer In Channels: ", in_channels)
+        # print("Conv Layer Out Channels: ", out_channels)
+        # print("Conv Layer kernel_size: ", kernel_size)
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=use_bias)
 
         # Normalization Layer
@@ -58,7 +71,9 @@ class ConvLayer(nn.Module):
             self.act = None
 
     def forward(self, x):
+        print("X Shape in Conv Layer: ", x.shape)
         x = self.conv(x)
+        print("X Shape 2 in Conv Layer: ", x.shape)
         if self.norm:
             x = self.norm(x)
         if self.act:
@@ -75,18 +90,30 @@ def get_same_padding(kernel_size: int or tuple[int, ...]) -> int or tuple[int, .
 
 class MultiScaleAttention(nn.Module):
     """
-    Modified to use LiteMLA (Lightweight Multi-Scale Linear Attention).
+    Custom Attention class implementing LiteMLA (Lightweight Multi-Scale Linear Attention). 
+    This class replaces traditional self-attention with a multi-scale linear attention mechanism, 
+    designed to efficiently handle varying scales within the input data. 
     """
-    def __init__(self, dim, num_heads=8, heads_ratio=1.0, scales=(5,), attn_drop=0., proj_drop=0.):
+    def __init__(
+            self,
+            in_channels,
+            dim, 
+            num_heads=8, 
+            heads_ratio=1.0, 
+            scales=(5,), 
+            attn_drop=0., 
+            proj_drop=0.
+    ):
         super().__init__()
         heads = num_heads or int(dim // dim * heads_ratio)
         total_dim = heads * dim
+        # print("MSA dim: ", dim)
 
         # LiteMLA specific initialization
         self.qkv = ConvLayer(
-            dim,
-            3 * total_dim,
-            1,
+            in_channels = in_channels,
+            out_channels = 3 * total_dim,
+            kernel_size = 1,
             use_bias=False,
             norm=None,
             act_func=None,
@@ -119,8 +146,6 @@ class MultiScaleAttention(nn.Module):
         self.proj_drop = nn.Dropout(proj_drop)
         self.eps = 1.0e-15
 
-
-    @autocast(enabled=False)
     def relu_linear_att(self, qkv: torch.Tensor) -> torch.Tensor:
         B, _, H, W = list(qkv.size())
 
@@ -160,11 +185,14 @@ class MultiScaleAttention(nn.Module):
         return out
 
     def forward(self, x):
+        print(f"Initial input shape: {x.shape}")  # Debug print
         B, T, N, C = x.shape
-        x = x.reshape(B * T, N, C)  # Reshape for ConvLayer compatibility
+        x = x.reshape(B, T * N, C)  # Reshape to [B, SeqLen, Features]
+        print(f"Shape after reshaping for ConvLayer: {x.shape}")  # Debug print
 
         # LiteMLA attention
         qkv = self.qkv(x)
+        print(f"Shape after self.qkv: {qkv.shape}")  # Debug print
         multi_scale_qkv = [qkv]
         for op in self.aggreg:
             multi_scale_qkv.append(op(qkv))
@@ -186,6 +214,7 @@ class TransformerLayer(nn.Module):
     """
     def __init__(
             self,
+            in_channels,
             dim,
             num_heads,
             mlp_ratio=4.,
@@ -202,7 +231,8 @@ class TransformerLayer(nn.Module):
         super().__init__()
         self.norm1 = norm_layer(dim)
         self.attn = MultiScaleAttention(
-            dim,
+            in_channels = in_channels,
+            dim = dim,
             num_heads=num_heads,
             attn_drop=attn_drop,
             proj_drop=proj_drop,
@@ -311,10 +341,13 @@ class NestLevel(nn.Module):
             self.pool = nn.Identity()
 
         # Transformer encoder
+        in_channels = prev_embed_dim if prev_embed_dim is not None else embed_dim
+
         if len(drop_path):
             assert len(drop_path) == depth, 'Must provide as many drop path rates as there are transformer layers'
         self.transformer_encoder = nn.Sequential(*[
             TransformerLayer(
+                in_channels  = in_channels, 
                 dim=embed_dim,
                 num_heads=num_heads,
                 mlp_ratio=mlp_ratio,
@@ -584,7 +617,7 @@ def checkpoint_filter_fn(state_dict, model):
     return state_dict
 
 
-def _create_nest(variant, pretrained=False, **kwargs):
+def _create_nest_msa(variant, pretrained=False, **kwargs):
     model = build_model_with_cfg(
         Nest,
         variant,
@@ -596,26 +629,20 @@ def _create_nest(variant, pretrained=False, **kwargs):
 
     return model
 
-
-def nest_base(pretrained=False, **kwargs) -> Nest:
-    """ Nest-B @ 224x224
-    """
-    model_kwargs = dict(
-        embed_dims=(128, 256, 512), num_heads=(4, 8, 16), depths=(2, 2, 20), **kwargs)
-    model = _create_nest('nest_base', pretrained=pretrained, **model_kwargs)
+def nest_MSA_base(pretrained=False, **kwargs) -> Nest:
+    """ Nest-MSA Base Model"""
+    model_kwargs = dict(img_size=32, embed_dims=(128, 256, 512), num_heads=(4, 8, 16), depths=(2, 2, 20), **kwargs)
+    model = _create_nest_msa('nest_MSA_base', pretrained=pretrained, **model_kwargs)
     return model
 
-
-def nest_small(pretrained=False, **kwargs) -> Nest:
-    """ Nest-S @ 224x224
-    """
-    model_kwargs = dict(embed_dims=(96, 192, 384), num_heads=(3, 6, 12), depths=(2, 2, 20), **kwargs)
-    model = _create_nest('nest_small', pretrained=pretrained, **model_kwargs)
+def nest_MSA_small(pretrained=False, **kwargs) -> Nest:
+    """ Nest-MSA Small Model"""
+    model_kwargs = dict(img_size=32, embed_dims=(96, 192, 384), num_heads=(3, 6, 12), depths=(2, 2, 20), **kwargs)
+    model = _create_nest_msa('nest_MSA_small', pretrained=pretrained, **model_kwargs)
     return model
 
-def nest_tiny(pretrained=False, **kwargs) -> Nest:
-    """ Nest-T @ 224x224
-    """
-    model_kwargs = dict(embed_dims=(96, 192, 384), num_heads=(3, 6, 12), depths=(2, 2, 8), **kwargs)
-    model = _create_nest('nest_tiny', pretrained=pretrained, **model_kwargs)
+def nest_MSA_tiny(pretrained=False, **kwargs) -> Nest:
+    """ Nest-MSA Tiny Model"""
+    model_kwargs = dict(img_size=32, embed_dims=(96, 192, 384), num_heads=(3, 6, 12), depths=(2, 2, 8), **kwargs)
+    model = _create_nest_msa('nest_MSA_tiny', pretrained=pretrained, **model_kwargs)
     return model
