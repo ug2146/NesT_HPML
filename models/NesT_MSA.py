@@ -38,6 +38,41 @@ _logger = logging.getLogger(__name__)
 #################################################################################
 #                             NesT with Lightweight MSA                         #
 #################################################################################
+class ConvLayer(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, use_bias=True, norm=None, act_func=None):
+        super(ConvLayer, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=use_bias)
+
+        # Normalization Layer
+        if norm == "bn2d":
+            self.norm = nn.BatchNorm2d(out_channels)
+        else:
+            self.norm = None
+
+        # Activation Function
+        if act_func == "relu":
+            self.act = nn.ReLU(inplace=True)
+        elif act_func == "gelu":
+            self.act = nn.GELU()
+        else:
+            self.act = None
+
+    def forward(self, x):
+        x = self.conv(x)
+        if self.norm:
+            x = self.norm(x)
+        if self.act:
+            x = self.act(x)
+        return x
+
+def get_same_padding(kernel_size: int or tuple[int, ...]) -> int or tuple[int, ...]:
+    if isinstance(kernel_size, tuple):
+        return tuple([get_same_padding(ks) for ks in kernel_size])
+    else:
+        assert kernel_size % 2 > 0, "kernel size should be odd number"
+        return kernel_size // 2
+
+
 class MultiScaleAttention(nn.Module):
     """
     Modified to use LiteMLA (Lightweight Multi-Scale Linear Attention).
