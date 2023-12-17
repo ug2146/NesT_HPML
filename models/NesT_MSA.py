@@ -51,9 +51,6 @@ class ConvLayer(nn.Module):
             act_func=None
     ):
         super(ConvLayer, self).__init__()
-        # print("Conv Layer In Channels: ", in_channels)
-        # print("Conv Layer Out Channels: ", out_channels)
-        # print("Conv Layer kernel_size: ", kernel_size)
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding, bias=use_bias)
 
         # Normalization Layer
@@ -71,9 +68,7 @@ class ConvLayer(nn.Module):
             self.act = None
 
     def forward(self, x):
-        print("X Shape in Conv Layer: ", x.shape)
         x = self.conv(x)
-        print("X Shape 2 in Conv Layer: ", x.shape)
         if self.norm:
             x = self.norm(x)
         if self.act:
@@ -105,13 +100,13 @@ class MultiScaleAttention(nn.Module):
             proj_drop=0.
     ):
         super().__init__()
-        heads = num_heads or int(dim // dim * heads_ratio)
-        total_dim = heads * dim
-        # print("MSA dim: ", dim)
+        self.dim = dim
+        heads = num_heads or int(in_channels // dim * heads_ratio)
+        total_dim = dim
 
         # LiteMLA specific initialization
         self.qkv = ConvLayer(
-            in_channels = in_channels,
+            in_channels = dim,
             out_channels = 3 * total_dim,
             kernel_size = 1,
             use_bias=False,
@@ -128,8 +123,8 @@ class MultiScaleAttention(nn.Module):
                         padding=get_same_padding(scale),
                         groups=3 * total_dim,
                         bias=False,
-                    ),
-                    nn.Conv2d(3 * total_dim, 3 * total_dim, 1, groups=3 * heads, bias=False),
+                    )
+                    # nn.Conv2d(3 * total_dim, 3 * total_dim, 1, groups=3 * heads, bias=False),
                 )
                 for scale in scales
             ]
@@ -185,14 +180,11 @@ class MultiScaleAttention(nn.Module):
         return out
 
     def forward(self, x):
-        print(f"Initial input shape: {x.shape}")  # Debug print
         B, T, N, C = x.shape
-        x = x.reshape(B, T * N, C)  # Reshape to [B, SeqLen, Features]
-        print(f"Shape after reshaping for ConvLayer: {x.shape}")  # Debug print
+        x = x.permute(0,3,1,2)
 
         # LiteMLA attention
         qkv = self.qkv(x)
-        print(f"Shape after self.qkv: {qkv.shape}")  # Debug print
         multi_scale_qkv = [qkv]
         for op in self.aggreg:
             multi_scale_qkv.append(op(qkv))
