@@ -1,0 +1,3 @@
+2023-12-17 03:36:00,620 INFO Initialized the logging for experiment: baseline-nest-tiny-analog-check
+2023-12-17 03:36:00,620 INFO Initialize the individual WandB run
+2023-12-17 03:36:12,576 INFO Model: nest-tiny-analog

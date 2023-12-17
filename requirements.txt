@@ -1,3 +1,6 @@
+cmake
+pybind11
+scikit-build
+aihwkit==0.7.1
 timm
 wandb
-aihwkit

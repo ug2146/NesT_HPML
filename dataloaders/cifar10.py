@@ -20,8 +20,8 @@ class Cifar10():
         return transforms.Compose([
             transforms.RandomCrop(size = (32, 32), padding = 4, padding_mode = "symmetric"),
             transforms.RandomRotation(degrees = 15),
-            transforms.RandomAffine(0, shear = 10, scale = (0.8, 1.2)),
-            transforms.ColorJitter(brightness = 0.2, contrast = 0.2, saturation = 0.2),
+            # transforms.RandomAffine(0, shear = 10, scale = (0.8, 1.2)),
+            # transforms.ColorJitter(brightness = 0.2, contrast = 0.2, saturation = 0.2),
             transforms.RandomHorizontalFlip(p = 0.5),
             transforms.ToTensor(),
             transforms.Normalize(mean = (0.4914, 0.4822, 0.4465), std = (0.2023, 0.1994, 0.2010)),
