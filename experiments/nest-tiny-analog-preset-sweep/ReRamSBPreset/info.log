@@ -1,0 +1,102 @@
+2023-12-17 15:49:14,827 INFO Initialized the logging for experiment: nest-tiny-analog-preset-sweep
+2023-12-17 15:49:14,859 INFO Model: nest-tiny-analog
+2023-12-17 15:49:28,641 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-17 15:49:28,641 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-17 15:49:28,644 INFO Warm up the model for 5 epochs
+2023-12-17 15:52:58,484 INFO Warm up: Average training time per epoch: 35.063 s
+2023-12-17 15:52:58,485 INFO Warm up: Average test time per epoch: 4.213 s
+2023-12-17 15:52:58,485 INFO Warm up: Average data-loading time per epoch: 0.934 s
+2023-12-17 15:52:58,485 INFO Warm up: Average device-loading time per epoch: 0.310 s
+2023-12-17 15:52:58,485 INFO .................................................................
+2023-12-17 15:52:58,486 INFO Warm up completed. Now training for 100 epochs
+2023-12-17 15:52:58,486 INFO Initializing the training learning rate scheduler
+2023-12-17 17:00:06,273 INFO Full Training: Average training time per epoch: 35.046 s
+2023-12-17 17:00:06,274 INFO Full Training: Average test time per epoch: 4.295 s
+2023-12-17 17:00:06,275 INFO Full Training: Average data-loading time per epoch: 0.944 s
+2023-12-17 17:00:06,275 INFO Full Training: Average device-loading time per epoch: 0.316 s
+2023-12-17 17:00:06,275 INFO Upload the experiment information to WandB
+2023-12-17 17:00:32,158 INFO Average run time per epoch: 42.635 s
+2023-12-17 17:01:03,806 INFO Initialized the logging for experiment: nest-tiny-analog-preset-sweep
+2023-12-17 17:01:03,807 INFO Model: nest-tiny-analog
+2023-12-17 17:01:13,795 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-17 17:01:13,795 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-17 17:01:13,798 INFO Warm up the model for 5 epochs
+2023-12-17 17:04:41,646 INFO Warm up: Average training time per epoch: 34.519 s
+2023-12-17 17:04:41,646 INFO Warm up: Average test time per epoch: 4.172 s
+2023-12-17 17:04:41,646 INFO Warm up: Average data-loading time per epoch: 0.919 s
+2023-12-17 17:04:41,647 INFO Warm up: Average device-loading time per epoch: 0.308 s
+2023-12-17 17:04:41,647 INFO .................................................................
+2023-12-17 17:04:41,647 INFO Warm up completed. Now training for 100 epochs
+2023-12-17 17:04:41,647 INFO Initializing the training learning rate scheduler
+2023-12-17 18:11:56,566 INFO Full Training: Average training time per epoch: 35.194 s
+2023-12-17 18:11:56,567 INFO Full Training: Average test time per epoch: 4.286 s
+2023-12-17 18:11:56,567 INFO Full Training: Average data-loading time per epoch: 0.965 s
+2023-12-17 18:11:56,568 INFO Full Training: Average device-loading time per epoch: 0.317 s
+2023-12-17 18:11:56,568 INFO Upload the experiment information to WandB
+2023-12-17 18:12:22,479 INFO Average run time per epoch: 42.687 s
+2023-12-17 18:12:53,680 INFO Initialized the logging for experiment: nest-tiny-analog-preset-sweep
+2023-12-17 18:12:53,681 INFO Model: nest-tiny-analog
+2023-12-17 18:13:09,577 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-17 18:13:09,578 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-17 18:13:09,580 INFO Warm up the model for 5 epochs
+2023-12-17 18:17:19,533 INFO Warm up: Average training time per epoch: 42.739 s
+2023-12-17 18:17:19,533 INFO Warm up: Average test time per epoch: 4.249 s
+2023-12-17 18:17:19,533 INFO Warm up: Average data-loading time per epoch: 0.847 s
+2023-12-17 18:17:19,534 INFO Warm up: Average device-loading time per epoch: 0.310 s
+2023-12-17 18:17:19,534 INFO .................................................................
+2023-12-17 18:17:19,534 INFO Warm up completed. Now training for 100 epochs
+2023-12-17 18:17:19,534 INFO Initializing the training learning rate scheduler
+2023-12-17 19:36:00,261 INFO Full Training: Average training time per epoch: 42.352 s
+2023-12-17 19:36:00,262 INFO Full Training: Average test time per epoch: 4.319 s
+2023-12-17 19:36:00,262 INFO Full Training: Average data-loading time per epoch: 0.865 s
+2023-12-17 19:36:00,262 INFO Full Training: Average device-loading time per epoch: 0.308 s
+2023-12-17 19:36:00,262 INFO Upload the experiment information to WandB
+2023-12-17 19:36:47,550 INFO Average run time per epoch: 50.180 s
+2023-12-17 19:37:25,800 INFO Initialized the logging for experiment: nest-tiny-analog-preset-sweep
+2023-12-17 19:37:25,800 INFO Model: nest-tiny-analog
+2023-12-17 19:37:43,942 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-17 19:37:43,942 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-17 19:37:43,944 INFO Warm up the model for 5 epochs
+2023-12-17 19:41:07,145 INFO Warm up: Average training time per epoch: 33.228 s
+2023-12-17 19:41:07,146 INFO Warm up: Average test time per epoch: 4.246 s
+2023-12-17 19:41:07,146 INFO Warm up: Average data-loading time per epoch: 0.899 s
+2023-12-17 19:41:07,146 INFO Warm up: Average device-loading time per epoch: 0.307 s
+2023-12-17 19:41:07,146 INFO .................................................................
+2023-12-17 19:41:07,146 INFO Warm up completed. Now training for 100 epochs
+2023-12-17 19:41:07,146 INFO Initializing the training learning rate scheduler
+2023-12-17 20:46:04,248 INFO Full Training: Average training time per epoch: 33.605 s
+2023-12-17 20:46:04,248 INFO Full Training: Average test time per epoch: 4.223 s
+2023-12-17 20:46:04,249 INFO Full Training: Average data-loading time per epoch: 0.910 s
+2023-12-17 20:46:04,249 INFO Full Training: Average device-loading time per epoch: 0.314 s
+2023-12-17 20:46:04,249 INFO Upload the experiment information to WandB
+2023-12-17 20:46:56,748 INFO Average run time per epoch: 41.528 s
+2023-12-17 20:47:36,573 INFO Initialized the logging for experiment: nest-tiny-analog-preset-sweep
+2023-12-17 20:47:36,574 INFO Model: nest-tiny-analog
+2023-12-17 20:47:54,027 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-17 20:47:54,028 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-17 20:47:54,030 INFO Warm up the model for 5 epochs
+2023-12-17 20:51:22,758 INFO Warm up: Average training time per epoch: 34.118 s
+2023-12-17 20:51:22,759 INFO Warm up: Average test time per epoch: 4.227 s
+2023-12-17 20:51:22,759 INFO Warm up: Average data-loading time per epoch: 0.870 s
+2023-12-17 20:51:22,759 INFO Warm up: Average device-loading time per epoch: 0.314 s
+2023-12-17 20:51:22,759 INFO .................................................................
+2023-12-17 20:51:22,759 INFO Warm up completed. Now training for 100 epochs
+2023-12-17 20:51:22,760 INFO Initializing the training learning rate scheduler
+2023-12-17 21:57:52,018 INFO Full Training: Average training time per epoch: 34.249 s
+2023-12-17 21:57:52,018 INFO Full Training: Average test time per epoch: 4.325 s
+2023-12-17 21:57:52,019 INFO Full Training: Average data-loading time per epoch: 0.925 s
+2023-12-17 21:57:52,019 INFO Full Training: Average device-loading time per epoch: 0.320 s
+2023-12-17 21:57:52,019 INFO Upload the experiment information to WandB
+2023-12-17 21:58:49,341 INFO Average run time per epoch: 42.553 s
+2023-12-17 21:59:31,356 INFO Initialized the logging for experiment: nest-tiny-analog-preset-sweep
+2023-12-17 21:59:31,567 INFO Model: nest-tiny-analog
+2023-12-17 22:00:11,038 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-17 22:00:11,038 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-17 22:00:11,041 INFO Warm up the model for 5 epochs
+2023-12-17 22:03:40,755 INFO Warm up: Average training time per epoch: 34.010 s
+2023-12-17 22:03:40,756 INFO Warm up: Average test time per epoch: 4.175 s
+2023-12-17 22:03:40,756 INFO Warm up: Average data-loading time per epoch: 0.834 s
+2023-12-17 22:03:40,756 INFO Warm up: Average device-loading time per epoch: 0.313 s
+2023-12-17 22:03:40,756 INFO .................................................................
+2023-12-17 22:03:40,757 INFO Warm up completed. Now training for 100 epochs
+2023-12-17 22:03:40,757 INFO Initializing the training learning rate scheduler

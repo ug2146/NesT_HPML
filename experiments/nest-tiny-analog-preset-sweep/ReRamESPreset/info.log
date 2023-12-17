@@ -1,0 +1,30 @@
+2023-12-17 07:37:05,646 INFO Initialized the logging for experiment: nest-tiny-analog-preset-sweep
+2023-12-17 07:37:05,672 INFO Model: nest-tiny-analog
+2023-12-17 07:37:19,508 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-17 07:37:19,508 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-17 07:37:19,510 INFO Warm up the model for 5 epochs
+2023-12-17 07:40:53,777 INFO Warm up: Average training time per epoch: 35.826 s
+2023-12-17 07:40:53,777 INFO Warm up: Average test time per epoch: 4.338 s
+2023-12-17 07:40:53,777 INFO Warm up: Average data-loading time per epoch: 0.990 s
+2023-12-17 07:40:53,778 INFO Warm up: Average device-loading time per epoch: 0.319 s
+2023-12-17 07:40:53,778 INFO .................................................................
+2023-12-17 07:40:53,778 INFO Warm up completed. Now training for 100 epochs
+2023-12-17 07:40:53,778 INFO Initializing the training learning rate scheduler
+2023-12-17 08:48:09,580 INFO Full Training: Average training time per epoch: 35.360 s
+2023-12-17 08:48:09,581 INFO Full Training: Average test time per epoch: 4.348 s
+2023-12-17 08:48:09,581 INFO Full Training: Average data-loading time per epoch: 0.944 s
+2023-12-17 08:48:09,581 INFO Full Training: Average device-loading time per epoch: 0.316 s
+2023-12-17 08:48:09,581 INFO Upload the experiment information to WandB
+2023-12-17 08:48:33,252 INFO Average run time per epoch: 42.737 s
+2023-12-17 08:49:02,504 INFO Initialized the logging for experiment: nest-tiny-analog-preset-sweep
+2023-12-17 08:49:02,505 INFO Model: nest-tiny-analog
+2023-12-17 08:49:13,883 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-17 08:49:13,884 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-17 08:49:13,886 INFO Warm up the model for 5 epochs
+2023-12-17 08:52:44,917 INFO Warm up: Average training time per epoch: 35.119 s
+2023-12-17 08:52:44,918 INFO Warm up: Average test time per epoch: 4.283 s
+2023-12-17 08:52:44,918 INFO Warm up: Average data-loading time per epoch: 0.888 s
+2023-12-17 08:52:44,918 INFO Warm up: Average device-loading time per epoch: 0.310 s
+2023-12-17 08:52:44,918 INFO .................................................................
+2023-12-17 08:52:44,918 INFO Warm up completed. Now training for 100 epochs
+2023-12-17 08:52:44,919 INFO Initializing the training learning rate scheduler

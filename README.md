@@ -43,6 +43,6 @@ The current method for installing **AIHWKIT** with *CUDA* support requires manua
 
     ```make build_cuda flags="-DRPU_CUDA_ARCHITECTURES='70' -DINTEL_MKL_DIR='/opt/conda/pkgs/mkl-2024.0.0-intel_49656' -DCMAKE_INCLUDE_PATH='/opt/conda/pkgs/mkl-include-2024.0.0-intel_49656/include'"```
 
-5. Set the PATH variable again before running the experiments
+5. Set the PATH variable again before running the experiments (set for every new terminal)
 
     ```export LD_LIBRARY_PATH=/opt/conda/pkgs/mkl-2024.0.0-intel_49656/lib:$LD_LIBRARY_PATH```

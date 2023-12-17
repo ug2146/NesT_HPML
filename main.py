@@ -4,10 +4,12 @@ import argparse
 import logging
 import os
 import yaml
+import functools
 
 import torch
 import time
 
+import wandb
 
 from pprint import pprint
 from trainer import Trainer
@@ -43,11 +45,31 @@ def load_config(args):
     
     return config
 
+def train(config, output_dir):
+    run_name = None
+    
+    if config['run_type'] == 'sweep':
+        run = wandb.init(group=config['name'])
+        # Access the config object
+        run_name = wandb.config.preset
+        run.name = run_name
+    
+    trainer = Trainer(config, output_dir, run_name)
+
+    if torch.cuda.is_available():   torch.cuda.synchronize()
+    exp_start = time.perf_counter()
+    trainer.train()
+    if torch.cuda.is_available():   torch.cuda.synchronize()
+    exp_end = time.perf_counter()
+    logging.info(f"Average run time per epoch: {(exp_end - exp_start)/config['nepochs']:.3f} s")
+
+    return
 
 def main(config):
 
     print("Current configuration: ")
     pprint(config)
+    # exit()
 
     # Create output/experiment folder and save config file
     output_dir = os.path.join("experiments", config['name'])
@@ -58,14 +80,21 @@ def main(config):
     # Support for only single-gpu training
     assert config['ngpus'] == 1, "Sorry! Only single-gpu training is supported!"
 
-    trainer = Trainer(config, output_dir)
+    # Check for WandB sweep
+    if config['run_type'] == 'sweep':
+        sweep_configuration = {
+            "name": "analog-ai-device-presets",
+            "metric": {"name": "test-epoch-accuracy", "goal": "maximize"},
+            "method": "grid",
+            "parameters": {"preset": {"values": config['sweep_parameters']}},
+        }
+        
+        sweep_id = wandb.sweep(sweep=sweep_configuration, project="NesT_HPML")
 
-    if torch.cuda.is_available():   torch.cuda.synchronize()
-    exp_start = time.perf_counter()
-    trainer.train()
-    if torch.cuda.is_available():   torch.cuda.synchronize()
-    exp_end = time.perf_counter()
-    logging.info(f"Average run time per epoch: {(exp_end - exp_start)/config['nepochs']:.3f} s")
+        wandb.agent(sweep_id, function=functools.partial(train, config, output_dir), count=len(config['sweep_parameters']))
+    else:
+        train(config, output_dir)
+    
     return
 
 if __name__ == "__main__":

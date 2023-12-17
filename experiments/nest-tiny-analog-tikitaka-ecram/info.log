@@ -1,0 +1,6 @@
+2023-12-17 05:28:19,993 INFO Initialized the logging for experiment: nest-tiny-analog-tikitaka-ecram
+2023-12-17 05:28:19,993 INFO Initialize the individual WandB run
+2023-12-17 05:28:31,623 INFO Model: nest-tiny-analog
+2023-12-17 05:28:51,943 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-17 05:28:51,943 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-17 05:28:51,945 INFO Warm up the model for 5 epochs

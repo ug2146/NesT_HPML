@@ -1,14 +1,10 @@
 from .nest import nest_tiny, nest_small, nest_base
 
+from utils.rpuconfig import get_rpuconfig
+
 from aihwkit.nn import AnalogLinear
 from aihwkit.nn import AnalogConv2d
-
-from aihwkit.simulator.configs import SingleRPUConfig
-from aihwkit.simulator.presets import ReRamESPreset
-
 from aihwkit.nn.conversion import convert_to_analog
-from aihwkit.simulator.presets import TikiTakaReRamSBPreset
-from aihwkit.simulator.configs import MappingParameter
 
 from aihwkit.simulator.configs import (
     RPUDataType,
@@ -23,17 +19,8 @@ from aihwkit.inference import PCMLikeNoiseModel
 
 import torch.nn as nn
 
-def get_rpuconfig():
-    # mapping = MappingParameter(
-    #     max_input_size=512,  # analog tile size
-    #     max_output_size=512,
-    #     digital_bias=True,
-    #     weight_scaling_omega=0.6,
-    #     )  # whether to use analog or digital bias
-    
-    # # Choose any preset or RPU configuration here
-    # rpu_config = TikiTakaReRamSBPreset(mapping=mapping)
-    # return rpu_config
+
+def get_default_rpuconfig():
     my_rpu_config = InferenceRPUConfig()
     my_rpu_config.mapping.digital_bias = True
     my_rpu_config.mapping.out_scaling_columnwise = True
@@ -63,43 +50,6 @@ def get_rpuconfig():
 
     return my_rpu_config
 
-def replace_linear_with_analog_linear(linear_layer, rpu_config):
-    in_features = linear_layer.in_features
-    out_features = linear_layer.out_features
-    bias = True if linear_layer.bias is not None else False
-    analog_linear_layer = AnalogLinear(in_features, out_features, bias=bias, rpu_config=rpu_config)
-    return analog_linear_layer
-
-def convert_linear_to_analog_linear(model, rpu_config):
-    for name, layer in model.named_children():
-        if isinstance(layer, nn.Linear):
-            # Replace Linear layer with AnalogLinear layer
-            analog_linear_layer = replace_linear_with_analog_linear(layer, rpu_config)
-            setattr(model, name, analog_linear_layer)
-        elif list(layer.children()):
-            # If the layer has children (e.g., nn.Sequential), recursively convert Linear layers
-            convert_linear_to_analog_linear(layer, rpu_config)
-
-def replace_conv2d_with_analog_conv2d(conv2d_layer, rpu_config):
-    in_channels = conv2d_layer.in_channels
-    out_channels = conv2d_layer.out_channels
-    kernel_size = conv2d_layer.kernel_size
-    stride = conv2d_layer.stride
-    padding = conv2d_layer.padding
-    
-    analog_conv2d_layer = AnalogConv2d(in_channels, out_channels, kernel_size, stride, padding, rpu_config=rpu_config)
-    return analog_conv2d_layer
-
-def convert_conv2d_to_analog_conv2d(model, rpu_config):
-    for name, layer in model.named_children():
-        if isinstance(layer, nn.Conv2d):
-            # Replace Conv2d layer with AnalogConv2d layer
-            analog_conv2d_layer = replace_conv2d_with_analog_conv2d(layer, rpu_config)
-            setattr(model, name, analog_conv2d_layer)
-        elif list(layer.children()):
-            # If the layer has children (e.g., nn.Sequential), recursively convert Conv2d layers
-            convert_conv2d_to_analog_conv2d(layer, rpu_config)
-
 def nest_base_analog(pretrained=False):
     """ Nest-B @ 224x224
     """
@@ -112,14 +62,17 @@ def nest_small_analog(pretrained=False):
     model = nest_small(pretrained)
     return model
 
-def nest_tiny_analog(pretrained=False):
+def nest_tiny_analog(pretrained=False, key=None):
     """ Nest-T @ 224x224
     """
     model = nest_tiny(pretrained)
-    print(model)
-    rpu_config = get_rpuconfig()
-    # convert_linear_to_analog_linear(model, rpu_config)
-    # convert_conv2d_to_analog_conv2d(model, rpu_config)
+    # print(model)
+    if key != None:
+        rpu_config = get_rpuconfig(key)
+        rpu_config = rpu_config()
+    else:
+        rpu_config = get_default_rpuconfig()
+    
     model = convert_to_analog(model, rpu_config)
     print(model)
     # exit()

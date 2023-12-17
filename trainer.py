@@ -13,57 +13,44 @@ from utils.loss import get_loss
 from utils.optimizer import get_optimizer
 from utils.scheduler import get_scheduler
 
-
-# class TqdmToLogger(io.StringIO):
-#     """
-#         Output stream for TQDM which will output to logger module instead of
-#         the StdOut.
-#     """
-#     logger = None
-#     level = None
-#     buf = ''
-#     def __init__(self, logger, level=None):
-#         super(TqdmToLogger, self).__init__()
-#         self.logger = logger
-#         self.level = level or logging.INFO
-#     def write(self, buf):
-#         self.buf = buf.strip('\r\n\t ')
-#     def flush(self):
-#         self.logger.log(self.level, self.buf)
-
-
 class Trainer():
-    def __init__(self, config, output_dir):
+    def __init__(self, config, output_dir, run_name=None):
         self.config = config
         self.train_epochs = self.config['nepochs']
         self.warmup_epochs = self.config['warmup_epochs']
         self.warmup_lr = self.config['warmup_lr']
         self.lr = self.config['lr']
-        # self.lr_restart = self.config['lr_restart']
+        self.lr_restart = self.config['lr_restart']
         self.lr_min = self.config['lr_min']
-        # self.global_train_step = 0
+        self.global_train_step = 0
 
         self.save_interval = self.config['save_every']
         self.prev_save = -1
 
         self.output_dir = output_dir
+        self.run_name = run_name
+
+        self.sweep_configuration = None
+
+        # Check if it is a sweep to change the output directory
+        if self.config['run_type'] == 'sweep':
+            assert run_name != None, "Run name should be given in a sweep!!"
+            self.output_dir = os.path.join(self.output_dir, self.run_name)
+            os.makedirs(self.output_dir, exist_ok=True)
 
         # Setup logging
         log_file = os.path.join(self.output_dir, 'info.log')
         config_logging(verbose=self.config['verbose'], log_file=log_file, append=self.config['resume'])
         logging.info(f"Initialized the logging for experiment: {self.config['name']}")
 
-        # # Create a tqdm handler
-        # logger = logging.getLogger()
-        # self.tqdm_out = TqdmToLogger(logger,level=logging.INFO)
-
-        # Check if the script is part of a sweep
-        is_sweeping = os.getenv('WANDB_SWEEP_ID') is not None
-
         # Initialize a run if not part of a sweep
-        if not is_sweeping:
+        if self.config['run_type'] == 'individual':
+            assert len(self.config['sweep_parameters']) < 1, "Sweep should not be done in an individual run!!!"
             logging.info("Initialize the individual WandB run")
             wandb.init(project="NesT_HPML", name=self.config['name'])
+
+        # Mention the preset
+        preset = self.run_name if self.run_name is not None else self.config['name']
 
         # Initialize
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -71,7 +58,7 @@ class Trainer():
 
         logging.info(f"Model: {self.config['model']}")
         
-        self.model = get_model(self.config['model'], pretrained=False)
+        self.model = get_model(self.config['model'], pretrained=False, preset=preset)
         self.model.to(self.device)
 
         self.train_dl = self.dataClass.make_dataloader(train=True)
@@ -83,20 +70,46 @@ class Trainer():
         self.loss = get_loss(self.config['loss'])
 
         self.optimizer = get_optimizer(self.config['optimizer'])
-        self.optimizer = self.optimizer(self.model.parameters(), lr=self.lr, weight_decay=self.config['weight_decay'])
+        
+        if "analog" in self.config['optimizer']:
+            self.optimizer = self.optimizer(self.model.parameters(), lr=self.lr)
+            self.optimizer.regroup_param_groups(self.model)
+        else:
+            self.optimizer = self.optimizer(self.model.parameters(), lr=self.lr, weight_decay=self.config['weight_decay'])
 
         self.warmup_scheduler = get_scheduler(self.config['warmup_scheduler'])
         self.warmup_scheduler = self.warmup_scheduler(self.optimizer, start_factor=self.warmup_lr/self.lr, end_factor=1.0, total_iters=self.warmup_epochs)
 
+    def prepare_for_qat(self):
+        logging.info("Quantization-Aware training. Preparing for Quantization")
+        self.model.train()
+        self.model.qconfig = torch.quantization.get_default_qat_qconfig('fbgemm')
+        torch.quantization.prepare_qat(self.model, inplace=True)
+    
+    def convert_to_quantized(self):
+        torch.quantization.convert(self.model.eval(), inplace=True)
+        # Save the quantized model
+        quantized_model_path = os.path.join(self.output_dir, 'model_quantized.pth')
+        torch.save(self.model.state_dict(), quantized_model_path)
+        torch.save({
+                    'epoch': self.train_epochs,
+                    'model': self.model.state_dict(),
+                    'optim': self.optimizer.state_dict(),
+                }, os.path.join(quantized_model_path.tar))
+        logging.info(f"Quantized model saved to {quantized_model_path}")
     
     def train(self):
         total_train_time = total_test_time = total_deviceload_time = total_dataload_time = total_overhead_time = 0.0
         
+        # Prepare for quantization if needed
+        if "quant" in self.config['training_type']:
+            self.prepare_for_qat()
+
         # Warm-Up
         logging.info(f"Warm up the model for {self.warmup_epochs} epochs")
         for e in range(self.warmup_epochs):
             self.e = e
-            wandb.log({"lr": self.warmup_scheduler.get_last_lr()[0]}, step=self.e)
+            wandb.log({"lr": self.warmup_scheduler.get_last_lr()[0]}, step=self.global_train_step)
             epoch_train_time, epoch_train_dataload_time, epoch_train_deviceload_time, epoch_train_overhead_time = self.per_epoch(key='train')
             epoch_test_time, epoch_test_dataload_time, epoch_test_deviceload_time, epoch_test_overhead_time = self.per_epoch(key='test')
             self.warmup_scheduler.step()
@@ -110,19 +123,17 @@ class Trainer():
         logging.info(f"Warm up: Average test time per epoch: {total_test_time/self.warmup_epochs:.3f} s")
         logging.info(f"Warm up: Average data-loading time per epoch: {total_dataload_time/self.warmup_epochs:.3f} s")
         logging.info(f"Warm up: Average device-loading time per epoch: {total_deviceload_time/self.warmup_epochs:.3f} s")
-        # logging.info(f"Warm up: Average overhead time per epoch: {total_overhead_time/self.warmup_epochs:.3f} s")
-
         logging.info(".................................................................")
         logging.info(f"Warm up completed. Now training for {self.train_epochs} epochs")
         logging.info(f"Initializing the training learning rate scheduler")
 
         self.train_scheduler = get_scheduler(self.config['train_scheduler'])
-        self.train_scheduler = self.train_scheduler(self.optimizer, T_max=self.train_epochs, eta_min=self.lr_min)
+        self.train_scheduler = self.train_scheduler(self.optimizer, T_max=self.lr_restart, eta_min=self.lr_min)
 
         # Actual training
         for e in range(self.warmup_epochs, self.train_epochs):
             self.e = e
-            wandb.log({"lr": self.train_scheduler.get_last_lr()[0]}, step=self.e)
+            wandb.log({"lr": self.train_scheduler.get_last_lr()[0]}, step=self.global_train_step)
             epoch_train_time, epoch_train_dataload_time, epoch_train_deviceload_time, epoch_train_overhead_time = self.per_epoch(key='train')
             epoch_test_time, epoch_test_dataload_time, epoch_test_deviceload_time, epoch_test_overhead_time = self.per_epoch(key='test')
             self.train_scheduler.step()
@@ -144,12 +155,20 @@ class Trainer():
         logging.info(f"Full Training: Average test time per epoch: {total_test_time/self.train_epochs:.3f} s")
         logging.info(f"Full Training: Average data-loading time per epoch: {total_dataload_time/self.train_epochs:.3f} s")
         logging.info(f"Full Training: Average device-loading time per epoch: {total_deviceload_time/self.train_epochs:.3f} s")
-        # logging.info(f"Full Training: Average overhead time per epoch: {total_overhead_time/self.train_epochs:.3f} s")
-
+        
         logging.info("Upload the experiment information to WandB")
-        artifact = wandb.Artifact(name=self.config['name'], type="info")
+        
+        if self.run_name == None: 
+            artifact = wandb.Artifact(name=self.config['name'], type="info")
+        else:
+            artifact = wandb.Artifact(name=f"{self.config['name']}/{self.run_name}", type="info")
+        
         artifact.add_dir(self.output_dir)
         wandb.log_artifact(artifact)
+
+        # Save the quantized model if needed
+        if "quant" in self.config['training_type']:
+            self.convert_to_quantized()
 
     def per_epoch(self, key):
         epoch_mode_time = epoch_deviceload_time = epoch_dataload_time = epoch_overhead_time = 0.0
@@ -204,7 +223,10 @@ class Trainer():
                     
                     if self.device == 'cuda':   torch.cuda.synchronize()
                     overhead_end = time.perf_counter()
-                    # if key == 'train': self.global_train_step += 1
+                    if key == 'train': 
+                        wandb.log({f"{key}-iter-accuracy": 100. * minibatch_accuracy.item()}, step=self.global_train_step)
+                        wandb.log({f"{key}-iter-loss": minibatch_loss.item()}, step=self.global_train_step)
+                        self.global_train_step += 1
 
                     epoch_dataload_time += (dataload_end - dataload_start)
                     epoch_mode_time += (mode_end - mode_start)
@@ -214,7 +236,7 @@ class Trainer():
             epoch_mode_accuracy /= len(dataloader[key].dataset)
             epoch_mode_loss /= len(dataloader[key].dataset)
 
-        wandb.log({f"{key}-epoch-accuracy": epoch_mode_accuracy}, step=self.e)
-        wandb.log({f"{key}-epoch-loss": epoch_mode_loss}, step=self.e)
+        wandb.log({f"{key}-epoch-accuracy": epoch_mode_accuracy}, step=self.global_train_step)
+        wandb.log({f"{key}-epoch-loss": epoch_mode_loss}, step=self.global_train_step)
 
         return epoch_mode_time, epoch_dataload_time, epoch_deviceload_time, epoch_overhead_time
