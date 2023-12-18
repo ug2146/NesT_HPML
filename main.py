@@ -51,7 +51,7 @@ def train(config, output_dir):
     if config['run_type'] == 'sweep':
         run = wandb.init(group=config['name'])
         # Access the config object
-        run_name = wandb.config.preset
+        run_name = f"{config['name']}-{wandb.config.preset}"
         run.name = run_name
     
     trainer = Trainer(config, output_dir, run_name)
@@ -86,12 +86,15 @@ def main(config):
         for key, value in config['sweep_parameters'].items():
             parameters[key] = {"values": value}
 
+        
         sweep_configuration = {
             "name": "analog-ai-device-presets",
             "metric": {"name": "test-epoch-accuracy", "goal": "maximize"},
             "method": "grid",
             "parameters": parameters,
         }
+
+        print(sweep_configuration)
         
         sweep_id = wandb.sweep(sweep=sweep_configuration, project="NesT_HPML")
 

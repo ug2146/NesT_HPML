@@ -171,7 +171,7 @@ class Trainer():
         if self.run_name == None: 
             artifact = wandb.Artifact(name=self.config['name'], type="info")
         else:
-            artifact = wandb.Artifact(name=f"{self.config['name']}/{self.run_name}", type="info")
+            artifact = wandb.Artifact(name=f"{self.config['name']}-{self.run_name}", type="info")
         
         artifact.add_dir(self.output_dir)
         wandb.log_artifact(artifact)

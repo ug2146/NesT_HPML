@@ -1,0 +1,12 @@
+2023-12-18 07:14:38,484 INFO Initialized the logging for experiment: resnet-analog-preset
+2023-12-18 07:14:38,521 INFO Model: resnet-analog
+2023-12-18 07:14:44,156 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-18 07:14:44,156 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-18 07:14:44,157 INFO Warm up the model for 5 epochs
+2023-12-18 07:33:51,923 INFO Warm up: Average training time per epoch: 224.328 s
+2023-12-18 07:33:51,923 INFO Warm up: Average test time per epoch: 2.406 s
+2023-12-18 07:33:51,923 INFO Warm up: Average data-loading time per epoch: 1.108 s
+2023-12-18 07:33:51,924 INFO Warm up: Average device-loading time per epoch: 0.345 s
+2023-12-18 07:33:51,924 INFO .................................................................
+2023-12-18 07:33:51,924 INFO Warm up completed. Now training for 100 epochs
+2023-12-18 07:33:51,924 INFO Initializing the training learning rate scheduler

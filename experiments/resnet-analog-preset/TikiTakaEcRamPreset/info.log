@@ -1,0 +1,5 @@
+2023-12-18 07:07:10,084 INFO Initialized the logging for experiment: resnet-analog-preset
+2023-12-18 07:07:10,108 INFO Model: resnet-analog
+2023-12-18 07:07:15,803 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-18 07:07:15,804 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-18 07:07:15,805 INFO Warm up the model for 5 epochs

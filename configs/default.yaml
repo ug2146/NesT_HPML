@@ -1,6 +1,6 @@
-name: nest-tiny-analog-tikitakarerames
+name: resnet-analog-preset
 training_type: analog
-model: nest-tiny-analog
+model: resnet-analog
 dataset: cifar-10
 
 ngpus: 1
@@ -35,8 +35,8 @@ sweep_parameters:
   # - 'EcRamMO2Preset'
   # - 'ReRamSB4Preset'
   # - 'EcRam4Preset'
-  - 'TikiTakaReRamESPreset'
-  # - 'TikiTakaEcRamPreset'
+  # - 'TikiTakaReRamESPreset'
+  - 'TikiTakaEcRamPreset'
   # - 'MixedPrecisionReRamESPreset'
   # - 'MixedPrecisionEcRamMOPreset'
   # - 'MixedPrecisionPCMPreset'

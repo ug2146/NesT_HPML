@@ -1,0 +1,26 @@
+name: resnet-analog-preset
+training_type: analog
+model: resnet-analog
+dataset: cifar-10
+ngpus: 1
+train_batch_size: 192
+test_batch_size: 100
+num_workers: 8
+nepochs: 100
+optimizer: AnalogAdam
+warmup_scheduler: LinearLR
+train_scheduler: CosineAnnealingLR
+warmup_epochs: 5
+warmup_lr: 0.0025
+lr: 0.01
+lr_min: 0.005
+lr_restart: 100
+weight_decay: 0.05
+loss: ce-loss
+save_every: 50
+resume: false
+verbose: false
+run_type: sweep
+sweep_parameters:
+  preset:
+  - TikiTakaEcRamPreset

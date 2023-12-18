@@ -10,3 +10,8 @@
 2023-12-18 04:22:17,806 INFO .................................................................
 2023-12-18 04:22:17,806 INFO Warm up completed. Now training for 100 epochs
 2023-12-18 04:22:17,806 INFO Initializing the training learning rate scheduler
+2023-12-18 05:55:27,567 INFO Full Training: Average training time per epoch: 49.347 s
+2023-12-18 05:55:27,567 INFO Full Training: Average test time per epoch: 5.900 s
+2023-12-18 05:55:27,568 INFO Full Training: Average data-loading time per epoch: 0.973 s
+2023-12-18 05:55:27,568 INFO Full Training: Average device-loading time per epoch: 0.338 s
+2023-12-18 05:55:27,568 INFO Upload the experiment information to WandB
