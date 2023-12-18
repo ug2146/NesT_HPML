@@ -1,3 +1,4 @@
+import copy
 import logging
 import os
 import torch
@@ -23,6 +24,10 @@ class Trainer():
         self.lr_restart = self.config['lr_restart']
         self.lr_min = self.config['lr_min']
         self.global_train_step = 0
+        
+        # Stubs for evaluating the quantized model
+        self.quant = torch.quantization.QuantStub()
+        self.dequant = torch.quantization.DeQuantStub()
 
         self.save_interval = self.config['save_every']
         self.prev_save = -1
@@ -82,21 +87,26 @@ class Trainer():
 
     def prepare_for_qat(self):
         logging.info("Quantization-Aware training. Preparing for Quantization")
-        self.model.train()
-        self.model.qconfig = torch.quantization.get_default_qat_qconfig('fbgemm')
-        torch.quantization.prepare_qat(self.model, inplace=True)
+        self.model.qconfig = torch.ao.quantization.get_default_qat_qconfig('fbgemm')
+        torch.ao.quantization.prepare_qat(self.model, inplace=True)
     
     def convert_to_quantized(self):
-        torch.quantization.convert(self.model.eval(), inplace=True)
+        logging.info("Quantization-Aware training. Convert to Quantized model for evaluation")
+        self.quantized_eval_model = copy.deepcopy(self.model)
+        self.quantized_eval_model.eval()
+        self.quantized_eval_model.to(torch.device("cpu"))
+        torch.ao.quantization.convert(self.quantized_eval_model, inplace=True)
+        
         # Save the quantized model
-        quantized_model_path = os.path.join(self.output_dir, 'model_quantized.pth')
-        torch.save(self.model.state_dict(), quantized_model_path)
-        torch.save({
-                    'epoch': self.train_epochs,
-                    'model': self.model.state_dict(),
-                    'optim': self.optimizer.state_dict(),
-                }, os.path.join(quantized_model_path.tar))
-        logging.info(f"Quantized model saved to {quantized_model_path}")
+        if self.e == self.train_epochs:
+            quantized_model_path = os.path.join(self.output_dir, 'model_quantized.pth')
+            torch.save({
+                        'epoch': self.train_epochs,
+                        'model': self.quantized_eval_model.state_dict(),
+                        'optim': self.optimizer.state_dict(),
+                    }, os.path.join(quantized_model_path.tar))
+            
+            logging.info(f"Quantized model saved to {quantized_model_path}")
     
     def train(self):
         total_train_time = total_test_time = total_deviceload_time = total_dataload_time = total_overhead_time = 0.0
@@ -181,7 +191,10 @@ class Trainer():
         epoch_mode_loss = 0
         
         self.model.train() if key == 'train' else self.model.eval()
-        inference_mode = key != 'train'        
+        inference_mode = key != 'train'
+
+        if "quant" in self.config['training_type']:
+            self.convert_to_quantized()        
 
         with torch.inference_mode(mode=inference_mode):
             with tqdm(len(dataloader[key])) as tepoch:
@@ -202,7 +215,11 @@ class Trainer():
 
                     if key == 'train': self.optimizer.zero_grad()
                     
-                    output = self.model(input)
+                    if "quant" in self.config['training_type']:
+                        output = self.quantized_eval_model(self.quant(data))
+                        output = self.dequant(output).to(self.device)
+                    else:
+                        output = self.model(input)
 
                     minibatch_loss = self.loss(output, target)
                     if key == 'train': minibatch_loss.backward()

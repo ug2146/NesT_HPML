@@ -1,7 +1,8 @@
-2023-12-17 22:55:01,309 INFO Initialized the logging for experiment: nest-tiny-qat
-2023-12-17 22:55:01,309 INFO Initialize the individual WandB run
-2023-12-17 22:55:12,886 INFO Model: nest-tiny
-2023-12-17 22:55:16,674 INFO Number of train samples in the cifar-10 dataset: 50000
-2023-12-17 22:55:16,675 INFO Number of test samples in the cifar-10 dataset: 10000
-2023-12-17 22:55:16,676 INFO Quantization-Aware training. Preparing for Quantization
-2023-12-17 22:55:17,027 INFO Warm up the model for 5 epochs
+2023-12-18 00:34:08,991 INFO Initialized the logging for experiment: nest-tiny-qat
+2023-12-18 00:34:08,991 INFO Initialize the individual WandB run
+2023-12-18 00:34:20,464 INFO Model: nest-tiny
+2023-12-18 00:34:24,637 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-18 00:34:24,637 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-18 00:34:24,640 INFO Quantization-Aware training. Preparing for Quantization
+2023-12-18 00:34:24,989 INFO Warm up the model for 5 epochs
+2023-12-18 00:34:25,270 INFO Quantization-Aware training. Convert to Quantized model for evaluation
