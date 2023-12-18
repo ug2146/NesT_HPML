@@ -16,29 +16,36 @@ from aihwkit.simulator.presets import MixedPrecisionReRamESPreset, MixedPrecisio
 from aihwkit.simulator.presets import StandardHWATrainingPreset, CapacitorPresetDevice, EcRamMOPresetDevice
 from aihwkit.simulator.presets import GokmenVlasovPresetDevice, PCMPresetDevice, ReRamArrayHfO2PresetDevice
 
-def get_rpuconfig(key):
-    if 'tikitaka' in key.lower() and 'reram' in key.lower(): return TikiTakaReRamESPreset
-    if 'tikitaka' in key.lower() and 'ecram' in key.lower(): return TikiTakaEcRamPreset
+from aihwkit.simulator.configs import MappingParameter
 
-    if 'mixed' in key.lower() and 'reram' in key.lower(): return MixedPrecisionReRamESPreset
-    if 'mixed' in key.lower() and 'ecram' in key.lower(): return MixedPrecisionEcRamMOPreset
-    if 'mixed' in key.lower() and 'pcm' in key.lower(): return MixedPrecisionPCMPreset
+def get_rpuconfig(preset_parameters):
 
-    if 'capacitor' in key.lower() and 'device' in key.lower(): return CapacitorPresetDevice
-    if 'ecrammo' in key.lower() and 'device' in key.lower(): return EcRamMOPresetDevice
-    if 'gokmen' in key.lower() and 'device' in key.lower(): return GokmenVlasovPresetDevice
-    if 'pcm' in key.lower() and 'device' in key.lower(): return PCMPresetDevice
-    if 'reram' in key.lower() and 'hfo2' in key.lower() and 'device' in key.lower(): return ReRamArrayHfO2PresetDevice
+    key = preset_parameters['preset']
+    mapping = MappingParameter(weight_scaling_omega=preset_parameters['weight_scaling_omega'], learn_out_scaling=preset_parameters['learn_out_scaling'])
 
-    if 'rerames2' in key.lower(): return ReRamES2Preset
-    if 'ecrammo2' in key.lower(): return EcRamMO2Preset
-    if 'reramsb4' in key.lower(): return ReRamSB4Preset
-    if 'ecram4' in key.lower(): return EcRam4Preset
+
+    if 'tikitaka' in key.lower() and 'reram' in key.lower(): return TikiTakaReRamESPreset(mapping=mapping)
+    if 'tikitaka' in key.lower() and 'ecram' in key.lower(): return TikiTakaEcRamPreset(mapping=mapping)
+
+    if 'mixed' in key.lower() and 'reram' in key.lower(): return MixedPrecisionReRamESPreset(mapping=mapping)
+    if 'mixed' in key.lower() and 'ecram' in key.lower(): return MixedPrecisionEcRamMOPreset(mapping=mapping)
+    if 'mixed' in key.lower() and 'pcm' in key.lower(): return MixedPrecisionPCMPreset(mapping=mapping)
+
+    if 'capacitor' in key.lower() and 'device' in key.lower(): return CapacitorPresetDevice(mapping=mapping)
+    if 'ecrammo' in key.lower() and 'device' in key.lower(): return EcRamMOPresetDevice(mapping=mapping)
+    if 'gokmen' in key.lower() and 'device' in key.lower(): return GokmenVlasovPresetDevice(mapping=mapping)
+    if 'pcm' in key.lower() and 'device' in key.lower(): return PCMPresetDevice(mapping=mapping)
+    if 'reram' in key.lower() and 'hfo2' in key.lower() and 'device' in key.lower(): return ReRamArrayHfO2PresetDevice(mapping=mapping)
+
+    if 'rerames2' in key.lower(): return ReRamES2Preset(mapping=mapping)
+    if 'ecrammo2' in key.lower(): return EcRamMO2Preset(mapping=mapping)
+    if 'reramsb4' in key.lower(): return ReRamSB4Preset(mapping=mapping)
+    if 'ecram4' in key.lower(): return EcRam4Preset(mapping=mapping)
     
-    if 'rerames' in key.lower(): return ReRamESPreset
-    if 'reramsb' in key.lower(): return ReRamSBPreset
-    if 'ecram' in key.lower(): return EcRamPreset
-    if 'pcm' in key.lower(): return PCMPreset
+    if 'rerames' in key.lower(): return ReRamESPreset(mapping=mapping)
+    if 'reramsb' in key.lower(): return ReRamSBPreset(mapping=mapping)
+    if 'ecram' in key.lower(): return EcRamPreset(mapping=mapping)
+    if 'pcm' in key.lower(): return PCMPreset(mapping=mapping)
     
     
     

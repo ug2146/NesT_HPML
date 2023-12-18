@@ -54,8 +54,13 @@ class Trainer():
             logging.info("Initialize the individual WandB run")
             wandb.init(project="NesT_HPML", name=self.config['name'])
 
-        # Mention the preset
-        preset = self.run_name if self.run_name is not None else self.config['name']
+        # Mention the preset parameters
+        preset_parameters = None
+
+        if self.run_name is not None:
+            preset_parameters = {'preset': self.config['preset'],
+                                 'weight_scaling_omega': self.config['weight_scaling_omega'],
+                                 'learn_out_scaling': self.config['learn_out_scaling']}
 
         # Initialize
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -63,7 +68,11 @@ class Trainer():
 
         logging.info(f"Model: {self.config['model']}")
         
-        self.model = get_model(self.config['model'], pretrained=False, preset=preset)
+        if preset_parameters != None:
+            self.model = get_model(self.config['model'], pretrained=False, preset_parameters=preset_parameters)
+        else:
+            self.model = get_model(self.config['model'], pretrained=False)
+        
         self.model.to(self.device)
 
         self.train_dl = self.dataClass.make_dataloader(train=True)

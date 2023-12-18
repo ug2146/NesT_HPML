@@ -62,14 +62,13 @@ def nest_small_analog(pretrained=False):
     model = nest_small(pretrained)
     return model
 
-def nest_tiny_analog(pretrained=False, key=None):
+def nest_tiny_analog(pretrained=False, preset_parameters=None):
     """ Nest-T @ 224x224
     """
     model = nest_tiny(pretrained)
     # print(model)
-    if key != None:
-        rpu_config = get_rpuconfig(key)
-        rpu_config = rpu_config()
+    if preset_parameters != None:
+        rpu_config = get_rpuconfig(preset_parameters)
     else:
         rpu_config = get_default_rpuconfig()
     

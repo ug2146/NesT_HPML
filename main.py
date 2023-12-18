@@ -51,7 +51,10 @@ def train(config, output_dir):
     if config['run_type'] == 'sweep':
         run = wandb.init(group=config['name'])
         # Access the config object
-        run_name = f"{config['name']}-{wandb.config.preset}"
+        config['preset'] = wandb.config.preset
+        config['weight_scaling_omega'] = wandb.config.weight_scaling_omega
+        config['learn_out_scaling'] = wandb.config.learn_out_scaling
+        run_name = f"{config['name']}-{config['preset']}-{config['weight_scaling_omega']}-{config['learn_out_scaling']}"
         run.name = run_name
     
     trainer = Trainer(config, output_dir, run_name)
@@ -69,7 +72,6 @@ def main(config):
 
     print("Current configuration: ")
     pprint(config)
-    # exit()
 
     # Create output/experiment folder and save config file
     output_dir = os.path.join("experiments", config['name'])
@@ -84,21 +86,23 @@ def main(config):
     if config['run_type'] == 'sweep':
         parameters = {}
         for key, value in config['sweep_parameters'].items():
-            parameters[key] = {"values": value}
+            if isinstance(value, dict):
+                parameters[key] = {'min': value['min'] , 'max': value['max']}
+            else:
+                parameters[key] = {"values": value}
 
-        
         sweep_configuration = {
             "name": "analog-ai-device-presets",
             "metric": {"name": "test-epoch-accuracy", "goal": "maximize"},
-            "method": "grid",
+            "method": "random",
             "parameters": parameters,
         }
 
-        print(sweep_configuration)
+        pprint(sweep_configuration)
         
         sweep_id = wandb.sweep(sweep=sweep_configuration, project="NesT_HPML")
 
-        wandb.agent(sweep_id, function=functools.partial(train, config, output_dir), count=len(config['sweep_parameters']))
+        wandb.agent(sweep_id, function=functools.partial(train, config, output_dir), count=30)
     else:
         train(config, output_dir)
     

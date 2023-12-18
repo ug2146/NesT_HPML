@@ -1,0 +1,17 @@
+2023-12-18 04:48:05,565 INFO Initialized the logging for experiment: nest-tiny-analog-tikitakaecram
+2023-12-18 04:48:05,608 INFO Model: nest-tiny-analog
+2023-12-18 04:48:27,250 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-18 04:48:27,250 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-18 04:48:27,253 INFO Warm up the model for 5 epochs
+2023-12-18 04:52:28,591 INFO Warm up: Average training time per epoch: 40.780 s
+2023-12-18 04:52:28,592 INFO Warm up: Average test time per epoch: 4.430 s
+2023-12-18 04:52:28,592 INFO Warm up: Average data-loading time per epoch: 0.890 s
+2023-12-18 04:52:28,592 INFO Warm up: Average device-loading time per epoch: 0.322 s
+2023-12-18 04:52:28,593 INFO .................................................................
+2023-12-18 04:52:28,593 INFO Warm up completed. Now training for 100 epochs
+2023-12-18 04:52:28,593 INFO Initializing the training learning rate scheduler
+2023-12-18 06:54:18,086 INFO Full Training: Average training time per epoch: 64.959 s
+2023-12-18 06:54:18,087 INFO Full Training: Average test time per epoch: 6.865 s
+2023-12-18 06:54:18,087 INFO Full Training: Average data-loading time per epoch: 1.011 s
+2023-12-18 06:54:18,088 INFO Full Training: Average device-loading time per epoch: 0.370 s
+2023-12-18 06:54:18,088 INFO Upload the experiment information to WandB
