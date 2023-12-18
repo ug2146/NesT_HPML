@@ -1,0 +1,19 @@
+2023-12-18 02:03:33,214 INFO Initialized the logging for experiment: nest-tiny-baseline-4
+2023-12-18 02:03:33,214 INFO Initialize the individual WandB run
+2023-12-18 02:03:45,534 INFO Model: nest-tiny
+2023-12-18 02:03:49,439 INFO Number of train samples in the cifar-10 dataset: 50000
+2023-12-18 02:03:49,439 INFO Number of test samples in the cifar-10 dataset: 10000
+2023-12-18 02:03:49,441 INFO Warm up the model for 5 epochs
+2023-12-18 02:05:11,483 INFO Warm up: Average training time per epoch: 12.090 s
+2023-12-18 02:05:11,484 INFO Warm up: Average test time per epoch: 1.463 s
+2023-12-18 02:05:11,484 INFO Warm up: Average data-loading time per epoch: 1.206 s
+2023-12-18 02:05:11,484 INFO Warm up: Average device-loading time per epoch: 0.349 s
+2023-12-18 02:05:11,484 INFO .................................................................
+2023-12-18 02:05:11,485 INFO Warm up completed. Now training for 100 epochs
+2023-12-18 02:05:11,485 INFO Initializing the training learning rate scheduler
+2023-12-18 02:30:46,053 INFO Full Training: Average training time per epoch: 11.794 s
+2023-12-18 02:30:46,054 INFO Full Training: Average test time per epoch: 1.450 s
+2023-12-18 02:30:46,054 INFO Full Training: Average data-loading time per epoch: 1.222 s
+2023-12-18 02:30:46,055 INFO Full Training: Average device-loading time per epoch: 0.351 s
+2023-12-18 02:30:46,055 INFO Upload the experiment information to WandB
+2023-12-18 02:30:52,880 INFO Average run time per epoch: 16.234 s

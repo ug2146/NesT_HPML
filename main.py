@@ -82,11 +82,15 @@ def main(config):
 
     # Check for WandB sweep
     if config['run_type'] == 'sweep':
+        parameters = {}
+        for key, value in config['sweep_parameters'].items():
+            parameters[key] = {"values": value}
+
         sweep_configuration = {
             "name": "analog-ai-device-presets",
             "metric": {"name": "test-epoch-accuracy", "goal": "maximize"},
             "method": "grid",
-            "parameters": {"preset": {"values": config['sweep_parameters']}},
+            "parameters": parameters,
         }
         
         sweep_id = wandb.sweep(sweep=sweep_configuration, project="NesT_HPML")

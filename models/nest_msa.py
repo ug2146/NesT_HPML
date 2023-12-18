@@ -248,7 +248,6 @@ class TransformerLayer(nn.Module):
         return x
 
 
-
 class ConvPool(nn.Module):
     def __init__(self, in_channels, out_channels, norm_layer, pad_type=''):
         super().__init__()
@@ -621,20 +620,20 @@ def _create_nest_msa(variant, pretrained=False, **kwargs):
 
     return model
 
-def nest_MSA_base(pretrained=False, **kwargs) -> Nest:
+def nest_msa_base(pretrained=False, **kwargs) -> Nest:
     """ Nest-MSA Base Model"""
     model_kwargs = dict(img_size=32, embed_dims=(128, 256, 512), num_heads=(4, 8, 16), depths=(2, 2, 20), **kwargs)
-    model = _create_nest_msa('nest_MSA_base', pretrained=pretrained, **model_kwargs)
+    model = _create_nest_msa('nest_msa_base', pretrained=pretrained, **model_kwargs)
     return model
 
-def nest_MSA_small(pretrained=False, **kwargs) -> Nest:
+def nest_msa_small(pretrained=False, **kwargs) -> Nest:
     """ Nest-MSA Small Model"""
     model_kwargs = dict(img_size=32, embed_dims=(96, 192, 384), num_heads=(3, 6, 12), depths=(2, 2, 20), **kwargs)
-    model = _create_nest_msa('nest_MSA_small', pretrained=pretrained, **model_kwargs)
+    model = _create_nest_msa('nest_msa_small', pretrained=pretrained, **model_kwargs)
     return model
 
-def nest_MSA_tiny(pretrained=False, **kwargs) -> Nest:
+def nest_msa_tiny(pretrained=False, **kwargs) -> Nest:
     """ Nest-MSA Tiny Model"""
     model_kwargs = dict(img_size=32, embed_dims=(96, 192, 384), num_heads=(3, 6, 12), depths=(2, 2, 8), **kwargs)
-    model = _create_nest_msa('nest_MSA_tiny', pretrained=pretrained, **model_kwargs)
+    model = _create_nest_msa('nest_msa_tiny', pretrained=pretrained, **model_kwargs)
     return model
