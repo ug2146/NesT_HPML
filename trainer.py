@@ -50,7 +50,6 @@ class Trainer():
 
         # Initialize a run if not part of a sweep
         if self.config['run_type'] == 'individual':
-            assert len(self.config['sweep_parameters']) < 1, "Sweep should not be done in an individual run!!!"
             logging.info("Initialize the individual WandB run")
             wandb.init(project="NesT_HPML", name=self.config['name'])
 

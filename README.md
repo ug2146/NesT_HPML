@@ -49,7 +49,7 @@ The current method for installing **AIHWKIT** with *CUDA* support requires manua
 
 ## Commands
 
-The simplest way to set configuration would be to update the `default.yaml` present in the `configs` directory. Each configuration would be automatically saved inside the `experiments/{run_name}` folder along with the **model weights**.
+The simplest way (and convenient) to set configuration would be to update the `default.yaml` present in the `configs` directory. Each configuration would be automatically saved inside the `experiments/{run_name}` folder along with the **model weights**.
 
 The command to run is  
 `python main.py`
