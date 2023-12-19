@@ -43,7 +43,7 @@ class ConvLayer(nn.Module):
             self, 
             in_channels, 
             out_channels, 
-            kernel_size, 
+            kernel_size=3, 
             stride=1, 
             padding=0, 
             use_bias=True, 
@@ -83,7 +83,7 @@ def get_same_padding(kernel_size: int or tuple[int, ...]) -> int or tuple[int, .
         return kernel_size // 2
 
 
-class MultiScaleAttention(nn.Module):
+class LiteMLA(nn.Module):
     """
     Custom Attention class implementing LiteMLA (Lightweight Multi-Scale Linear Attention). 
     This class replaces traditional self-attention with a multi-scale linear attention mechanism, 
@@ -91,7 +91,6 @@ class MultiScaleAttention(nn.Module):
     """
     def __init__(
             self,
-            in_channels,
             dim, 
             num_heads=8, 
             heads_ratio=1.0, 
@@ -101,37 +100,38 @@ class MultiScaleAttention(nn.Module):
     ):
         super().__init__()
         self.dim = dim
-        heads = num_heads or int(in_channels // dim * heads_ratio)
-        total_dim = dim
+        heads = num_heads or int(dim // dim * heads_ratio)
+        self.dim_per_head = dim // num_heads
+        # print(self.dim, num_heads, self.dim_per_head)
 
         # LiteMLA specific initialization
         self.qkv = ConvLayer(
             in_channels = dim,
-            out_channels = 3 * total_dim,
+            out_channels = 3 * dim,
             kernel_size = 1,
             use_bias=False,
-            norm=None,
+            norm="bn2d",
             act_func=None,
         )
         self.aggreg = nn.ModuleList(
             [
                 nn.Sequential(
                     nn.Conv2d(
-                        3 * total_dim,
-                        3 * total_dim,
+                        3 * dim,
+                        3 * dim,
                         scale,
                         padding=get_same_padding(scale),
-                        groups=3 * total_dim,
+                        groups=3 * dim,
                         bias=False,
-                    )
-                    # nn.Conv2d(3 * total_dim, 3 * total_dim, 1, groups=3 * heads, bias=False),
+                    ),
+                    nn.Conv2d(3 * dim, 3 * dim, 1, groups=3 * heads, bias=False),
                 )
                 for scale in scales
             ]
         )
         self.kernel_func = nn.ReLU(inplace=False)
         self.proj = ConvLayer(
-            total_dim * (1 + len(scales)),
+            dim * (1 + len(scales)),
             dim,
             1,
             use_bias=False,
@@ -152,15 +152,15 @@ class MultiScaleAttention(nn.Module):
             (
                 B,
                 -1,
-                3 * self.dim,
+                3 * self.dim_per_head,
                 H * W,
             ),
         )
         qkv = torch.transpose(qkv, -1, -2)
         q, k, v = (
-            qkv[..., 0 : self.dim],
-            qkv[..., self.dim : 2 * self.dim],
-            qkv[..., 2 * self.dim :],
+            qkv[..., 0 : self.dim_per_head],
+            qkv[..., self.dim_per_head : 2 * self.dim_per_head],
+            qkv[..., 2 * self.dim_per_head :],
         )
 
         # lightweight linear attention
@@ -181,6 +181,7 @@ class MultiScaleAttention(nn.Module):
 
     def forward(self, x):
         B, T, N, C = x.shape
+        # NHWC to NCHW
         x = x.permute(0,3,1,2)
 
         # LiteMLA attention
@@ -206,7 +207,6 @@ class TransformerLayer(nn.Module):
     """
     def __init__(
             self,
-            in_channels,
             dim,
             num_heads,
             mlp_ratio=4.,
@@ -222,8 +222,7 @@ class TransformerLayer(nn.Module):
     ):
         super().__init__()
         self.norm1 = norm_layer(dim)
-        self.attn = MultiScaleAttention(
-            in_channels = in_channels,
+        self.attn = LiteMLA(
             dim = dim,
             num_heads=num_heads,
             attn_drop=attn_drop,
@@ -331,14 +330,10 @@ class NestLevel(nn.Module):
         else:
             self.pool = nn.Identity()
 
-        # Transformer encoder
-        in_channels = prev_embed_dim if prev_embed_dim is not None else embed_dim
-
         if len(drop_path):
             assert len(drop_path) == depth, 'Must provide as many drop path rates as there are transformer layers'
         self.transformer_encoder = nn.Sequential(*[
             TransformerLayer(
-                in_channels  = in_channels, 
                 dim=embed_dim,
                 num_heads=num_heads,
                 mlp_ratio=mlp_ratio,

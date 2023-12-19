@@ -46,3 +46,12 @@ The current method for installing **AIHWKIT** with *CUDA* support requires manua
 5. Set the PATH variable again before running the experiments (set for every new terminal)
 
     ```export LD_LIBRARY_PATH=/opt/conda/pkgs/mkl-2024.0.0-intel_49656/lib:$LD_LIBRARY_PATH```
+
+## Commands
+
+The simplest way to set configuration would be to update the `default.yaml` present in the `configs` directory. Each configuration would be automatically saved inside the `experiments/{run_name}` folder along with the **model weights**.
+
+The command to run is  
+`python main.py`
+
+The metrics can be visualized at this [WandB](https://wandb.ai/hpmlugvc/NesT_HPML) space
